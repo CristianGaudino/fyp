@@ -1,0 +1,8 @@
+[09:39] Arbelaez, Alejandro
+football-data.co.uk 
+https://www.kaggle.com/hugomathien/soccer   - SQL Lite. Not nice but lots of info
+https://www.nature.com/articles/s41597-019-0247-7     - paper about dataset
+
+Measuring the effectiveness of playing strategies at soccer   - Example paper
+Modeling Scores in the Premier League: Is Manchester United Really the Best?    - Example paper
+
