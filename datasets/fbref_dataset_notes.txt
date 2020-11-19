@@ -1,0 +1,43 @@
+Fixtures csv:
+	Main dataset, data will be added to here. This will become the dataframe for the model
+	Contains a final score in format 5-2. Will have to use this to add a new field for winner i.e. W, D, L, and then drop the score. 
+	Drop:
+		Wk, Day, Date, Time, xG, xG, Attendance, Venue, Referee, Match Report, Notes
+	
+
+Squad Stats:
+	Drop:
+		# P1, Age, MP, Starts, Min, PK, PKatt, 
+		Maybe don't use any stats after CrdR, check anyway
+		Feature engineering to add per 90 mins maybe
+
+Squad Goalkeeping:
+	Take:
+		Clean sheets maybe
+		Shots on target, Saves, Save %
+		
+Squad Shooting:
+	Take:
+		Shots total, Shots on target, etc.
+	Drop:
+		G/Sh, S/SoT, Dist, FK, PK, PKatt, all expected
+
+Squad Goal and Shot Creation:
+	Might be interesting to use
+
+Squad Defensive Actions:
+	Potential
+
+Squad Possession:
+	Potential if info isnt already in other sets
+	
+
+		
+spi_global:
+	Get both teams spi rating and subtract them.
+
+Remember:
+	Don't forget to cite where the data comes from, https://fbref.com/en/comps/9/3232/2019-2020-Premier-League-Stats
+	Home team goals - away team goals. Will give +/- result.
+
+	There's a match report on fbref for every match.
