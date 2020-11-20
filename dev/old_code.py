@@ -5,8 +5,11 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import PolynomialFeatures
 
 from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
+from sklearn.linear_model import Lasso
 from sklearn.neighbors import KNeighborsRegressor
 
 from sklearn.model_selection import cross_val_score
@@ -15,7 +18,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import ShuffleSplit
 from sklearn.model_selection import GridSearchCV
 
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.metrics import mean_squared_error
 
 
 from joblib import dump, load
@@ -101,15 +104,15 @@ linear = np.mean(cross_val_score(linear_model, rest_of_X, rest_of_y, scoring="ne
 
 
 # QUADRATIC
-quadratic_model = Pipeline([
-    ("poly", PolynomialFeatures(degree=2, include_bias=False)),
+poly_model = Pipeline([
+    ("poly", PolynomialFeatures(degree=1, include_bias=False)),
     ("predictor", LinearRegression())
 ])
 
 # CHECKING THE FITTING
-scores = cross_validate(quadratic_model, rest_of_X, rest_of_y, cv=ss, scoring="neg_mean_absolute_error", return_train_score=True)
-print("Training Error: ", np.mean(np.abs(scores["train_score"])))
-print("Validation Error: ", np.mean(np.abs(scores["test_score"])))
+#scores = cross_validate(poly_model, rest_of_X, rest_of_y, cv=ss, scoring="neg_mean_absolute_error", return_train_score=True)
+#print("Training Error: ", np.mean(np.abs(scores["train_score"])))
+#print("Validation Error: ", np.mean(np.abs(scores["test_score"])))
 '''
 # HYPER-PARAMETER SELECTION.
 # Dictionary of hyper-parameters to try
@@ -132,3 +135,19 @@ print(gs.best_params_, gs.best_score_)
 # 3 degrees, training error 1.6, val error 0.3
 # 2 degrees, training 4, val 0.03
 # 1 degree, training 1.65, val 2
+
+
+scaler = StandardScaler()
+rest_of_X = scaler.fit_transform(rest_of_X)
+train_df, valid_df = train_test_split(rest_of_X, train_size=0.75, random_state=2)
+train_y = train_df["FTR"].values
+valid_y = valid_df["FTR"].values
+
+ridge = Ridge(alpha=0)
+ridge.fit(train_df, train_y)
+
+y_predicted_ridge = ridge.predict(valid_df)
+mse_ridge = mean_squared_error(y_predicted_ridge, valid_y)
+print(mse_ridge)
+print(ridge.intercept_)
+print(ridge.coef_)

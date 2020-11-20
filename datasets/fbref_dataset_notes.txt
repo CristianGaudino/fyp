@@ -3,7 +3,7 @@ Fixtures csv:
 	Contains a final score in format 5-2. Will have to use this to add a new field for winner i.e. W, D, L, and then drop the score. 
 	Drop:
 		Wk, Day, Date, Time, xG, xG, Attendance, Venue, Referee, Match Report, Notes
-	
+
 
 Squad Stats:
 	Drop:
@@ -15,7 +15,7 @@ Squad Goalkeeping:
 	Take:
 		Clean sheets maybe
 		Shots on target, Saves, Save %
-		
+
 Squad Shooting:
 	Take:
 		Shots total, Shots on target, etc.
@@ -30,9 +30,13 @@ Squad Defensive Actions:
 
 Squad Possession:
 	Potential if info isnt already in other sets
-	
 
-		
+
+-- Player Stats --
+Will need to include individual stats for every player on the team.
+Decide what stats I want for the 11 players
+IDK what to do for this, can't get the starting 11.
+
 spi_global:
 	Get both teams spi rating and subtract them.
 
@@ -41,3 +45,4 @@ Remember:
 	Home team goals - away team goals. Will give +/- result.
 
 	There's a match report on fbref for every match.
+
