@@ -1,6 +1,3 @@
-from dev.parsing_dataset import *
+from dev.parse_datasets import *
 
-parsed_fixtures = parseFixtures("../datasets/fbref_2019-2020_prem_fixtures.csv")
-
-for line in parsed_fixtures:
-    print(line)
+#parsed_fixtures = addResult("../datasets/fbref_2019-2020_prem_fixtures.csv")
