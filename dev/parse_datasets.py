@@ -1,27 +1,13 @@
-import pandas as pd
-import numpy as np
-
-#df = pd.read_csv("../datasets/updated_fbref_2019-2020_prem_fixtures.csv")
-
-#print(df.head())
-
-#print(df.describe(include="all"))
-
-#features = ["Home", "Away", "Result"]
-#df.drop("Wk", axis=1, inplace=True)
-#rest_of_df = df[features]
-
-#print(rest_of_df.dtypes)
-
-# The final dataset should contain more info, such as date of game and final score, but then in pandas we'll drop these.
-
-# In the top method:    Headings only gets called once at the start.
+import os
 
 def parseDatasets():
     # Reads in a fixtures file line by line and appends extra data from other datasets.
     # Outputs the results to a new file "../datasets/premier_league_2019-2020_fixtures.csv"
     path_fixtures = "../datasets/fbref_2019-2020_prem_fixtures.csv"
     output_file = "../datasets/premier_league_2019-2020_fixtures.csv"
+
+    if os.path.exists(output_file):
+        os.remove(output_file)
 
     fixtures_indices = [2, 4, 6, 8]
 
