@@ -30,20 +30,22 @@ def getFixtureURL(home_team, away_team):
         for a in range(len(rows[i])):
             # Home Team
             target = str(rows[i][3]).split('">')    # Split the row to make the regular expression easier
-            target = re.search('(.*)</a>', target[-1])  # Regular expression to remove unwanted characters
-            target_home = target.group(1)
+            if len(target) > 2:
+                target = re.search('(.*)</a>', target[-1])  # Regular expression to remove unwanted characters
+                target_home = target.group(1)
 
-            # Away Team
-            target = str(rows[i][7]).split('">')  # Split the row to make the regular expression easier
-            target = re.search('(.*)</a>', target[-1])  # Regular expression to remove unwanted characters
-            target_away = target.group(1)
+                # Away Team
+                target = str(rows[i][7]).split('">')  # Split the row to make the regular expression easier
+                if len(target) > 2:
+                    target = re.search('(.*)</a>', target[-1])  # Regular expression to remove unwanted characters
+                    target_away = target.group(1)
 
-            if target_home == home_team and target_away == away_team:
-                match_url = str(rows[i][-2])[:-23]   # Get url from the row, convert to string and remove the final characters
-                match_url = match_url.split(" ")
-                match_url = match_url[-1][6:]
-                match_url = "https://fbref.com" + match_url
-                return match_url
+                    if target_home == home_team and target_away == away_team:
+                        match_url = str(rows[i][-2])[:-23]   # Get url from the row, convert to string and remove the final characters
+                        match_url = match_url.split(" ")
+                        match_url = match_url[-1][6:]
+                        match_url = "https://fbref.com" + match_url
+                        return match_url
             break
 
 
@@ -71,7 +73,7 @@ def getLineups(home_team, away_team):
             rows.append(column)
             row_marker += 1
 
-        rows = rows[1:-8]   # Remove unnecessary info
+        rows = rows[1:-10]   # Remove unnecessary info
         for i in range(len(rows)):
             player = rows[i][1]
             result = re.search('">(.*)</a>', str(player))   # Use a regular expression to get the player name from the table row
@@ -79,9 +81,7 @@ def getLineups(home_team, away_team):
 
     return players
 
-#def getLineupStats(lineup):
-
 
 if __name__ == "__main__":
-    lineups = getLineups("Manchester Utd", "Chelsea")
+    lineups = getLineups("Liverpool", "Chelsea")
     print(lineups)
