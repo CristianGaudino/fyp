@@ -1,4 +1,5 @@
 import os
+from dev.crawler import *
 
 def parseDatasets():
     # Reads in a fixtures file line by line and appends extra data from other datasets.
@@ -43,7 +44,7 @@ def parseDatasets():
 
         line = ','.join(line)
         line += "\n"
-        print(line)
+        #print(line)
         new_file = open(output_file, "a")
         new_file.write(line)
 
@@ -51,12 +52,15 @@ def parseDatasets():
 def calculateStats(home_team, away_team):
     home_stats = getStats(home_team)
     away_stats = getStats(away_team)
+    lineup_stats = getLineupStats(home_team, away_team)
 
     final_stats = []
 
     for i in range(len(home_stats)):
         result = float(home_stats[i]) - float(away_stats[i])
-        final_stats.append("%.6f" % result)
+        final_stats.append("%.3f" % result)
+
+    final_stats.append(lineup_stats)
 
     return final_stats
 
@@ -148,6 +152,9 @@ def modifyShotCreationHeadings(headings):
         headings[i] += "GCA"
 
     return headings
+
+def getLineupStats(home_team, away_team):
+    # Get the stats for both team's lineups
 
 
 if __name__ == "__main__":
