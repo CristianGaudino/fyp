@@ -2,6 +2,7 @@ import os
 import re
 from dev.crawler import *
 
+
 def parseDatasets():
     # Reads in a fixtures file line by line and appends extra data from other datasets.
     # Outputs the results to a new file "../datasets/premier_league_2019-2020_fixtures.csv"
@@ -13,7 +14,7 @@ def parseDatasets():
 
     fixtures_indices = [2, 4, 6, 8]
 
-    file = open(path_fixtures, "r")
+    file = open(path_fixtures, "r", encoding="utf-8")
 
     for line in file:
         line = line[:-1]
@@ -47,7 +48,7 @@ def parseDatasets():
         line = ','.join(str(item) for item in line)
         print(line)
         line += "\n"
-        new_file = open(output_file, "a")
+        new_file = open(output_file, "a", encoding="utf-8")
         new_file.write(line)
 
 
@@ -114,7 +115,7 @@ def getStats(team_name):
 def getSpecificStats(team_name, path, indices):
     # Given a team name, a path csv and a list of indices, return a csv style string of the relevant statistics.
     if team_name == "Headings":
-        with open(path) as f:
+        with open(path, "r", encoding="utf-8") as f:
             line = f.readline()
             line = line.split(",")
             headings = [line[i] for i in indices]
@@ -129,7 +130,7 @@ def getSpecificStats(team_name, path, indices):
 
             return headings
     else:
-        file = open(path, "r")
+        file = open(path, "r", encoding="utf-8")
         for line in file:
             line = line[:-1]    # Remove newline character
             line = line.split(",")
@@ -174,7 +175,7 @@ def getLineupStats(home_team, away_team, lineup_path, lineup_indices):
     away_mf_array = []
     away_fw_array = []
 
-    file = open(lineup_path, "r")
+    file = open(lineup_path, "r", encoding="utf-8")
     #print(lineups)
     for line in file:
 
@@ -242,18 +243,16 @@ def getLineupsHeadings():
     return lineup_headings
 
 
-
 if __name__ == "__main__":
-
     #print("\n--- Stats ---\n")
     #getStats("Headings")
     #getStats("Liverpool")
 
     #print(calculateStats("Aston Villa", "Newcastle Utd"))
-    parseDatasets()
 
     #stats = getLineupStats("Liverpool", "Chelsea")
     #print(stats)
 
     #headings = getLineupsHeadings()
     #print(headings)
+    parseDatasets()
