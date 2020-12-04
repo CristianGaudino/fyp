@@ -3,8 +3,6 @@ Fixtures csv:
 	Contains a final score in format 5-2. Will have to use this to add a new field for winner i.e. W, D, L, and then drop the score.
 
 	Headings:
-		Wk,Day,Date,Time,Home,xG,Score,xG,Away,Attendance,Venue,Referee,Match Report,Notes
-		But it could just be:
 		Date, Home, Score, Away, Result.
 
 Squad Stats:
