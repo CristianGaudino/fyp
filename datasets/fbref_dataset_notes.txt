@@ -42,15 +42,24 @@ League Table Stats:
 	Headings:
 		W,D,L,Pts,
 
+Player Stats:
+	if player name and squad match. Use position to order the lineup, GK, DF, MF, FW
+	Headings:
+		MP, Min, Gls, Ast, GlsPer90, AstPer90
+		7, 9, 10, 11, 16, 17
+	
+	Rename headings same with other datasets. Will have to do something like, add GK before each heading, etc.
+	New function getLineupStats(), given a list of 22 players, hometeam, awayteam. 
+	A list for each position.
+	For line in file, if player name and team name match, then give indices and add to appropriate list (Some are DF/MF etc.)
+	If pos is GK, then only get MP and Min. (Or maybe just ignore gk)
+	Once all 22 player's stats have been added to the 4 lists, combine them and return.
 
--- Player Stats --
-Will need to include individual stats for every player on the team.
-Decide what stats I want for the 11 players
-IDK what to do for this, can't get the starting 11.
+
 
 spi_global:
-	Get both teams spi rating and subtract them.
-	dont use.
+	Get both teams spi rating and subtract them, no point we wont have historic data for this.
+	dont bother.
 
 Remember:
 	Don't forget to cite where the data comes from, https://fbref.com/en/comps/9/3232/2019-2020-Premier-League-Stats
