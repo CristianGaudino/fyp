@@ -1,4 +1,5 @@
 import os
+import re
 from dev.crawler import *
 
 def parseDatasets():
@@ -41,10 +42,11 @@ def parseDatasets():
             headings = getStats("Headings")
             line.append(result)
             line = line + headings
+            line = line + getLineupsHeadings()  # Add the lineups headings
 
-        line = ','.join(line)
+        line = ','.join(str(item) for item in line)
+        print(line)
         line += "\n"
-        #print(line)
         new_file = open(output_file, "a")
         new_file.write(line)
 
@@ -52,7 +54,11 @@ def parseDatasets():
 def calculateStats(home_team, away_team):
     home_stats = getStats(home_team)
     away_stats = getStats(away_team)
-    lineup_stats = getLineupStats(home_team, away_team)
+
+    path_lineup = "../datasets/fbref_2019-2020_prem_players.csv"
+    lineup_indices = [7, 9, 10, 11, 16, 17]
+
+    lineup_stats = getLineupStats(home_team, away_team, path_lineup, lineup_indices)
 
     final_stats = []
 
@@ -60,7 +66,7 @@ def calculateStats(home_team, away_team):
         result = float(home_stats[i]) - float(away_stats[i])
         final_stats.append("%.3f" % result)
 
-    final_stats.append(lineup_stats)
+    final_stats = final_stats + lineup_stats
 
     return final_stats
 
@@ -138,7 +144,6 @@ def getSpecificStats(team_name, path, indices):
 
 def modifySquadHeadings(headings):
     # Modify the names of headings
-
     headings[-1] += "Per90"
     headings[-2] += "Per90"
     return headings
@@ -153,8 +158,89 @@ def modifyShotCreationHeadings(headings):
 
     return headings
 
-def getLineupStats(home_team, away_team):
+def getLineupStats(home_team, away_team, lineup_path, lineup_indices):
     # Get the stats for both team's lineups
+    gk_indices = lineup_indices[:2]
+
+    lineups = getLineups(home_team, away_team)  # Returns a list of 22 players, 11 for each team
+
+    home_gk_array = []
+    home_df_array = []
+    home_mf_array = []
+    home_fw_array = []
+
+    away_gk_array = []
+    away_df_array = []
+    away_mf_array = []
+    away_fw_array = []
+
+    file = open(lineup_path, "r")
+    #print(lineups)
+    for line in file:
+
+        line = line[:-1]    # Remove newline character
+        line = line.split(",")
+
+        if line[1] != "Player":     # skip over the heading line
+            #print(line)
+            player_name = re.search('(.*)\\\\', line[1])
+            line[1] = player_name.group(1)      # Assign back to line
+
+            if line[1] in lineups and (line[4] == home_team or line[4] == away_team):
+                lineups.remove(line[1])
+                line[3] = line[3][:2]   # Some players have 2 positions, main position is stored first so just take this
+                if line[3] == "GK":
+                    home_bool = True if line[4] == home_team else False
+                    stats = [line[i] for i in gk_indices]
+                    home_gk_array.append(stats) if home_bool else away_gk_array.append(stats)
+                elif line[3] == "DF":
+                    home_bool = True if line[4] == home_team else False
+                    stats = [line[i] for i in lineup_indices]
+                    home_df_array.append(stats) if home_bool else away_df_array.append(stats)
+                elif line[3] == "MF":
+                    home_bool = True if line[4] == home_team else False
+                    stats = [line[i] for i in lineup_indices]
+                    home_mf_array.append(stats) if home_bool else away_mf_array.append(stats)
+                elif line[3] == "FW":
+                    home_bool = True if line[4] == home_team else False
+                    stats = [line[i] for i in lineup_indices]
+                    home_fw_array.append(stats) if home_bool else away_fw_array.append(stats)
+
+    home_stats = home_gk_array + home_df_array + home_mf_array + home_fw_array
+    away_stats = away_gk_array + away_df_array + away_mf_array + away_fw_array
+    lineup_stats = home_stats + away_stats
+
+    lineup_stats = [str(item) for sublist in lineup_stats for item in sublist]     # Flatten the list of lists
+
+    return lineup_stats
+
+def getLineupsHeadings():
+    # Given a  line of headings, parse it to a list of the headings wanted.
+    # pos 0 & 11 are goalkeepers, rest are outfield.
+    # MP_1_Home, Min_1_Home, MP_2_Home etc. 1-11 for both teams.
+    gk_headings = ["MP_1", "Min_1"]
+    outfield_headings = ["MP", "Min", "Gls", "Ast", "GlsPer90", "AstPer90"]
+
+    headings = [gk_headings]
+
+    for i in range(2, 12):
+        player_headings = []
+        for heading in outfield_headings:
+            player_headings.append("%s_%d" % (heading, i))  # Add the heading + the player's position to headings
+
+        headings.append(player_headings)
+
+    home_headings = []
+    away_headings = []
+    for player_heading in headings:
+        home_headings.append([item + "_Home" for item in player_heading])  # Append Home to the end of every heading
+        away_headings.append([item + "_Away" for item in player_heading])  # Append Away to the end of every heading
+
+    lineup_headings = home_headings + away_headings
+    lineup_headings = [item for sublist in lineup_headings for item in sublist]     # Flatten the list of lists
+
+    return lineup_headings
+
 
 
 if __name__ == "__main__":
@@ -165,3 +251,9 @@ if __name__ == "__main__":
 
     #print(calculateStats("Aston Villa", "Newcastle Utd"))
     parseDatasets()
+
+    #stats = getLineupStats("Liverpool", "Chelsea")
+    #print(stats)
+
+    #headings = getLineupsHeadings()
+    #print(headings)
