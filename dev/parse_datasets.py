@@ -7,20 +7,20 @@ from dev.crawler import *
 def parseDatasets():
     # Reads in a fixtures file line by line and appends extra data from other datasets.
     # Outputs the results to a new file "../datasets/premier_league_2019-2020_fixtures.csv"
-    path_fixtures = "../datasets/fbref_2019-2020_prem_fixtures.csv"
-    output_file = "../datasets/premier_league_2019-2020_fixtures.csv"
+    path_fixtures = "../datasets/prem_2018-2019/fbref_2018-2019_prem_fixtures.csv"
+    output_file = "../datasets/prem_2018-2019/premier_league_2018-2019_fixtures.csv"
 
     if os.path.exists(output_file):
         os.remove(output_file)
 
     # The list of html fixtures is created here, thus it will only be created once
-    fixtures_url = 'https://fbref.com/en/comps/9/3232/schedule/2019-2020-Premier-League-Scores-and-Fixtures'
+    fixtures_url = 'https://fbref.com/en/comps/9/1889/schedule/2018-2019-Premier-League-Scores-and-Fixtures'
     html_fixtures_array = getFixtureAsHTML(fixtures_url)
 
     fixtures_indices = [2, 4, 6, 8]
 
     # Build the player statistics dictionary
-    players_path = "../datasets/fbref_2019-2020_prem_players.csv"
+    players_path = "../datasets/prem_2018-2019/fbref_2018-2019_prem_players.csv"
     players_dict = playerCSVToDictionary(players_path)
 
     file = open(path_fixtures, "r", encoding="utf-8")
@@ -82,28 +82,28 @@ def calculateStats(home_team, away_team, fixtures_array, players_dict):
 
 def getStats(team_name):
 
-    path_standings = "../datasets/fbref_2019-2020_prem_table.csv"
+    path_standings = "../datasets/prem_2018-2019/fbref_2018-2019_prem_table.csv"
     standings_indices = [3, 4, 5, 9]
 
-    path_squad = "../datasets/fbref_2019-2020_prem_squad_stats.csv"
+    path_squad = "../datasets/prem_2018-2019/fbref_2018-2019_prem_squad_stats.csv"
     squad_indices = [3, 7, 8, 11, 12, 13, 14]
 
-    path_shooting = "../datasets/fbref_2019-2020_prem_squad_shooting.csv"
+    path_shooting = "../datasets/prem_2018-2019/fbref_2018-2019_prem_squad_shooting.csv"
     shooting_indices = [4, 5, 6, 7, 8, 9, 10]
 
-    path_goalkeeping = "../datasets/fbref_2019-2020_prem_squad_goalkeeping.csv"
+    path_goalkeeping = "../datasets/prem_2018-2019/fbref_2018-2019_prem_squad_goalkeeping.csv"
     goalkeeping_indices = [5, 6, 7, 8, 9, 13, 14]
 
-    path_passing = "../datasets/fbref_2019-2020_prem_squad_passing.csv"
+    path_passing = "../datasets/prem_2018-2019/fbref_2018-2019_prem_squad_passing.csv"
     passing_indices = [5, 20, 21, 24]
 
-    path_shot_creation = "../datasets/fbref_2019-2020_prem_squad_shot_creation.csv"
+    path_shot_creation = "../datasets/prem_2018-2019/fbref_2018-2019_prem_squad_shot_creation.csv"
     shot_creation_indices = [3, 4, 5, 7, 8, 10, 11, 12, 13, 15, 16, 18]
 
-    path_defensive = "../datasets/fbref_2019-2020_prem_squad_defense.csv"
+    path_defensive = "../datasets/prem_2018-2019/fbref_2018-2019_prem_squad_defense.csv"
     defensive_indices = [4, 18, 22, 25]
 
-    path_possession = "../datasets/fbref_2019-2020_prem_squad_possession.csv"
+    path_possession = "../datasets/prem_2018-2019/fbref_2018-2019_prem_squad_possession.csv"
     possession_indices = [10, 22]
 
     standings_stats = getSpecificStats(team_name, path_standings, standings_indices)
@@ -140,13 +140,12 @@ def getSpecificStats(team_name, path, indices):
     else:
         file = open(path, "r", encoding="utf-8")
         for line in file:
-            line = line[:-1]    # Remove newline character
+            if line[-1] == "\n":
+                line = line[:-1]    # Remove newline character
+
             line = line.split(",")
             if line[0] == team_name or line[1] == team_name:
                 team_line = [line[i] for i in indices]
-
-                if team_line[-1] == "\n":    # Remove new line character
-                    team_line = team_line[:-1]
 
                 return team_line
 
@@ -272,3 +271,8 @@ if __name__ == "__main__":
     parseDatasets()
 
     #playerCSVToDictionary("../datasets/fbref_2019-2020_prem_players.csv")
+
+    #path_defensive = "../datasets/prem_2018-2019/fbref_2018-2019_prem_squad_defense.csv"
+    #defensive_indices = [4, 18, 22, 25]
+    #defensive_stats = getSpecificStats("Wolves", path_defensive, defensive_indices)
+    #print(defensive_stats)
