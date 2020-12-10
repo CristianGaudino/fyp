@@ -1,5 +1,6 @@
 import os
 import re
+import csv
 from dev.crawler import *
 
 
@@ -12,7 +13,15 @@ def parseDatasets():
     if os.path.exists(output_file):
         os.remove(output_file)
 
+    # The list of html fixtures is created here, thus it will only be created once
+    fixtures_url = 'https://fbref.com/en/comps/9/3232/schedule/2019-2020-Premier-League-Scores-and-Fixtures'
+    html_fixtures_array = getFixtureAsHTML(fixtures_url)
+
     fixtures_indices = [2, 4, 6, 8]
+
+    # Build the player statistics dictionary
+    players_path = "../datasets/fbref_2019-2020_prem_players.csv"
+    players_dict = playerCSVToDictionary(players_path)
 
     file = open(path_fixtures, "r", encoding="utf-8")
 
@@ -35,7 +44,7 @@ def parseDatasets():
                 result = "D"
 
             line.append(result)
-            stats = calculateStats(line[1], line[3])
+            stats = calculateStats(line[1], line[3], html_fixtures_array, players_dict)
             line = line + stats
 
         else:
@@ -52,14 +61,13 @@ def parseDatasets():
         new_file.write(line)
 
 
-def calculateStats(home_team, away_team):
+def calculateStats(home_team, away_team, fixtures_array, players_dict):
     home_stats = getStats(home_team)
     away_stats = getStats(away_team)
 
-    path_lineup = "../datasets/fbref_2019-2020_prem_players.csv"
-    lineup_indices = [7, 9, 10, 11, 16, 17]
+    lineup_indices = [5, 7, 8, 9, 14, 15]
 
-    lineup_stats = getLineupStats(home_team, away_team, path_lineup, lineup_indices)
+    lineup_stats = getLineupStats(home_team, away_team, fixtures_array, players_dict, lineup_indices)
 
     final_stats = []
 
@@ -159,11 +167,12 @@ def modifyShotCreationHeadings(headings):
 
     return headings
 
-def getLineupStats(home_team, away_team, lineup_path, lineup_indices):
+
+def getLineupStats(home_team, away_team, html_fixtures_array, players_dict, lineup_indices):
     # Get the stats for both team's lineups
     gk_indices = lineup_indices[:2]
 
-    lineups = getLineups(home_team, away_team)  # Returns a list of 22 players, 11 for each team
+    lineups = getLineups(home_team, away_team, html_fixtures_array)  # Returns a list of 22 players, 11 for each team
 
     home_gk_array = []
     home_df_array = []
@@ -175,37 +184,31 @@ def getLineupStats(home_team, away_team, lineup_path, lineup_indices):
     away_mf_array = []
     away_fw_array = []
 
-    file = open(lineup_path, "r", encoding="utf-8")
-    #print(lineups)
-    for line in file:
+    # Below here needs to be redone with the dictionary, the lineup indices also have to change by -2
+    # Loop through the lineups list, get the dictionary values, then do the if statements for position
+    # Need to handle players with same name, no worry for now
 
-        line = line[:-1]    # Remove newline character
-        line = line.split(",")
+    # MINUS 2 FROM THE INDICES LISTS
+    for player in lineups:
+        player_stats = players_dict.get(player)
+        player_stats[1] = player_stats[1][:2]   # Some players have 2 positions, main position is stored first so just take this
 
-        if line[1] != "Player":     # skip over the heading line
-            #print(line)
-            player_name = re.search('(.*)\\\\', line[1])
-            line[1] = player_name.group(1)      # Assign back to line
-
-            if line[1] in lineups and (line[4] == home_team or line[4] == away_team):
-                lineups.remove(line[1])
-                line[3] = line[3][:2]   # Some players have 2 positions, main position is stored first so just take this
-                if line[3] == "GK":
-                    home_bool = True if line[4] == home_team else False
-                    stats = [line[i] for i in gk_indices]
-                    home_gk_array.append(stats) if home_bool else away_gk_array.append(stats)
-                elif line[3] == "DF":
-                    home_bool = True if line[4] == home_team else False
-                    stats = [line[i] for i in lineup_indices]
-                    home_df_array.append(stats) if home_bool else away_df_array.append(stats)
-                elif line[3] == "MF":
-                    home_bool = True if line[4] == home_team else False
-                    stats = [line[i] for i in lineup_indices]
-                    home_mf_array.append(stats) if home_bool else away_mf_array.append(stats)
-                elif line[3] == "FW":
-                    home_bool = True if line[4] == home_team else False
-                    stats = [line[i] for i in lineup_indices]
-                    home_fw_array.append(stats) if home_bool else away_fw_array.append(stats)
+        if player_stats[1] == "GK":
+            home_bool = True if player_stats[2] == home_team else False
+            stats = [player_stats[i] for i in gk_indices]
+            home_gk_array.append(stats) if home_bool else away_gk_array.append(stats)
+        elif player_stats[1] == "DF":
+            home_bool = True if player_stats[2] == home_team else False
+            stats = [player_stats[i] for i in lineup_indices]
+            home_df_array.append(stats) if home_bool else away_df_array.append(stats)
+        elif player_stats[1] == "MF":
+            home_bool = True if player_stats[2] == home_team else False
+            stats = [player_stats[i] for i in lineup_indices]
+            home_mf_array.append(stats) if home_bool else away_mf_array.append(stats)
+        elif player_stats[1] == "FW":
+            home_bool = True if player_stats[2] == home_team else False
+            stats = [player_stats[i] for i in lineup_indices]
+            home_fw_array.append(stats) if home_bool else away_fw_array.append(stats)
 
     home_stats = home_gk_array + home_df_array + home_mf_array + home_fw_array
     away_stats = away_gk_array + away_df_array + away_mf_array + away_fw_array
@@ -242,6 +245,17 @@ def getLineupsHeadings():
 
     return lineup_headings
 
+def playerCSVToDictionary(path):
+    # Given a path to a csv, return a python dictionary
+    csv_dict = {}
+    for line in open(path, "r", encoding="utf-8").readlines()[1:]:  # Skip the heading line
+        line = line.replace('\n', '')
+        line = line.split(',')
+        line[1] = re.search('(.*)\\\\', line[1]).group(1)   # Regular expression to adjust the player name field
+
+        csv_dict[line[1]] = line[2:]    # Add the new entry to the dictionary
+
+    return csv_dict
 
 if __name__ == "__main__":
     #print("\n--- Stats ---\n")
@@ -256,3 +270,5 @@ if __name__ == "__main__":
     #headings = getLineupsHeadings()
     #print(headings)
     parseDatasets()
+
+    #playerCSVToDictionary("../datasets/fbref_2019-2020_prem_players.csv")

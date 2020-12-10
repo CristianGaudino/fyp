@@ -2,30 +2,17 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
-def getFixtureURL(home_team, away_team):
-    fixtures_url = 'https://fbref.com/en/comps/9/3232/schedule/2019-2020-Premier-League-Scores-and-Fixtures'
+def getFixtureAsHTML(fixtures_url):
 
-    html = requests.get(fixtures_url).content    # Get the raw html text from the web page
+    html = requests.get(fixtures_url).content  # Get the raw html text from the web page
     # print(html)
 
-    soup = BeautifulSoup(html, 'lxml')  # Parse the HTML as a string
+    rows = getTableFromHTMLPage(html, 0)
 
-    table = soup.find_all('table')[0]  # Grab the first table from the html text
+    return rows
 
-    rows = []
-    row_marker = 0
-    for row in table.find_all('tr'):
-        column = []
-        column_marker = 0
-        columns = row.find_all('td')
-        for col in columns:
-            column.append(col)
-            column_marker += 1
-        rows.append(column)
-        row_marker += 1
 
-    # Rows is now a list of rows for each fixture
-
+def getFixtureURL(home_team, away_team, rows):
     for i in range(len(rows)):
         for a in range(len(rows[i])):
             # Home Team
@@ -49,39 +36,49 @@ def getFixtureURL(home_team, away_team):
             break
 
 
-def getLineups(home_team, away_team):
-    match_url = getFixtureURL(home_team, away_team)
+def getLineups(home_team, away_team, html_fixtures_array):
+    match_url = getFixtureURL(home_team, away_team, html_fixtures_array)
 
     html = requests.get(match_url).content  # Get the raw html text from the web page
     # print(html)
 
     players = []
-
-    soup = BeautifulSoup(html, 'lxml')  # Parse the HTML as a string
-    for i in range(2):
-        table = soup.find_all('table')[i]  # Grab the first table from the html text, the home team's lineup
-
-        rows = []
-        row_marker = 0
-        for row in table.find_all('tr'):
-            column = []
-            column_marker = 0
-            columns = row.find_all('td')
-            for col in columns:
-                column.append(col)
-                column_marker += 1
-            rows.append(column)
-            row_marker += 1
-
-        rows = rows[1:-10]   # Remove unnecessary info
+    for num in range(2):
+        rows = getTableFromHTMLPage(html, num)
+        rows = rows[1:12]  # Remove unnecessary info
         for i in range(len(rows)):
             player = rows[i][1]
-            result = re.search('">(.*)</a>', str(player))   # Use a regular expression to get the player name from the table row
-            players.append(result.group(1))     # Append the player to the players list
+            result = re.search('">(.*)</a>', str(player))  # Use a regular expression to get the player name from the table row
+            players.append(result.group(1))  # Append the player to the players list
 
     return players
 
 
+def getTableFromHTMLPage(html, index):
+    # Given some html taken from a request and an index to a table, return a list of table rows.
+
+    soup = BeautifulSoup(html, 'lxml')  # Parse the HTML as a string
+    table = soup.find_all('table')[index]  # Grab the first table from the html text
+
+    rows = []
+    row_marker = 0
+    for row in table.find_all('tr'):
+        column = []
+        column_marker = 0
+        columns = row.find_all('td')
+        for col in columns:
+            column.append(col)
+            column_marker += 1
+        rows.append(column)
+        row_marker += 1
+
+        # Rows is now a list of rows for each fixture
+    return rows
+
+
 if __name__ == "__main__":
-    lineups = getLineups("Liverpool", "Chelsea")
+    fixtures_url = 'https://fbref.com/en/comps/9/3232/schedule/2019-2020-Premier-League-Scores-and-Fixtures'
+    html_fixtures_array = getFixtureAsHTML(fixtures_url)
+
+    lineups = getLineups("Aston Villa", "Sheffield Utd", html_fixtures_array)
     print(lineups)
