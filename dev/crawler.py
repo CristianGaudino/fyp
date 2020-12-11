@@ -20,6 +20,7 @@ def getFixtureURL(home_team, away_team, rows):
             if len(target) > 2:
                 target = re.search('(.*)</a>', target[-1])  # Regular expression to remove unwanted characters
                 target_home = target.group(1)
+                #print(target_home, "---", home_team)
 
                 # Away Team
                 target = str(rows[i][7]).split('">')  # Split the row to make the regular expression easier
