@@ -23,7 +23,8 @@ def getFixtureURL(home_team, away_team, rows):
                 #print(target_home, "---", home_team)
 
                 # Away Team
-                target = str(rows[i][7]).split('">')  # Split the row to make the regular expression easier
+                # target = str(rows[i][7]).split('">')  # Split the row to make the regular expression easier - New Seasons
+                target = str(rows[i][5]).split('">')  # Split the row to make the regular expression easier - Old Seasons
                 if len(target) > 2:
                     target = re.search('(.*)</a>', target[-1])  # Regular expression to remove unwanted characters
                     target_away = target.group(1)
@@ -78,8 +79,15 @@ def getTableFromHTMLPage(html, index):
 
 
 if __name__ == "__main__":
-    fixtures_url = 'https://fbref.com/en/comps/9/3232/schedule/2019-2020-Premier-League-Scores-and-Fixtures'
+    # fixtures_url = 'https://fbref.com/en/comps/9/1467/schedule/2015-2016-Premier-League-Scores-and-Fixtures'
+    fixtures_url = 'https://fbref.com/en/comps/9/1526/schedule/2016-2017-Premier-League-Scores-and-Fixtures'
+    # fixtures_url = 'https://fbref.com/en/comps/9/1631/schedule/2017-2018-Premier-League-Scores-and-Fixtures'
+    # fixtures_url = 'https://fbref.com/en/comps/9/1889/schedule/2018-2019-Premier-League-Scores-and-Fixtures'
+    # fixtures_url = 'https://fbref.com/en/comps/9/3232/schedule/2019-2020-Premier-League-Scores-and-Fixtures'
     html_fixtures_array = getFixtureAsHTML(fixtures_url)
 
-    lineups = getLineups("Aston Villa", "Sheffield Utd", html_fixtures_array)
-    print(lineups)
+    #lineups = getLineups("Aston Villa", "Sheffield Utd", html_fixtures_array)
+    #print(lineups)
+
+    match_url = getFixtureURL("Hull City", "Leicester City", html_fixtures_array)
+    print(match_url)
