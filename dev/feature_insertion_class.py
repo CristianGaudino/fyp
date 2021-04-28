@@ -2,18 +2,19 @@ from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
 
 
-class InsertFeature(BaseEstimator, TransformerMixin):
-    def __init__(self, equation, feature_name, insert=True):
+class InsertDivideFeature(BaseEstimator, TransformerMixin):
+    def __init__(self, new_feature_name, feature_one, feature_two, insert=True):
         self.insert = insert
-        self.equation = equation
-        self.feature_name = feature_name
+        self.new_feature_name = new_feature_name
+        self.feature_one = feature_one
+        self.feature_two = feature_two
 
     def fit(self, X, y=None):
         return self
 
     def transform(self, X, y=None):
         if self.insert:
-            X[self.feature_name] = self.equation
+            X[self.new_feature_name] = X[self.feature_one] / X[self.feature_two]
             X = X.replace([np.inf, -np.inf], np.nan)
             X = X.replace([np.nan], 0)
         return X

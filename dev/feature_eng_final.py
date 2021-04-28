@@ -162,7 +162,7 @@ class TransformerFromHyperP(BaseEstimator, TransformerMixin):
 # Using holdout with stratification
 sss = StratifiedShuffleSplit(n_splits=1, train_size=0.75, random_state=2)   # Split for validation set, 60-20-20 overall
 
-
+'''
 print("----UNALTERED----")
 unaltered_preprocessor = ColumnTransformer([
         ("num", Pipeline([("scaler", TransformerFromHyperP())]),
@@ -184,8 +184,10 @@ print("KNN BEST PARAMS/SCORE: ", knn_gs.best_params_, knn_gs.best_score_)
 # Checking for under/overfitting
 unaltered_knn.set_params(**knn_gs.best_params_)
 scores = cross_validate(unaltered_knn, unaltered_X, unaltered_y, cv=sss, scoring="accuracy", return_train_score=True)
-print("KNN Training Accuracy: ", np.mean(scores["train_score"]))
-print("KNN Validation Accuracy: ", np.mean(scores["test_score"]))
+unaltered_score_train = np.mean(scores["train_score"])
+unaltered_score_test = np.mean(scores["test_score"])
+print("KNN Training Accuracy: ", unaltered_score_train)
+print("KNN Validation Accuracy: ", unaltered_score_test)
 
 
 print("----FEATURE_SELECTION----")
@@ -209,9 +211,11 @@ print("KNN BEST PARAMS/SCORE: ", knn_gs.best_params_, knn_gs.best_score_)
 # Checking for under/overfitting
 sel_knn.set_params(**knn_gs.best_params_)
 scores = cross_validate(sel_knn, feature_sel_X, feature_sel_y, cv=sss, scoring="accuracy", return_train_score=True)
-print("KNN Training Accuracy: ", np.mean(scores["train_score"]))
-print("KNN Validation Accuracy: ", np.mean(scores["test_score"]))
-
+sel_score_train = np.mean(scores["train_score"])
+sel_score_test = np.mean(scores["test_score"])
+print("KNN Training Accuracy: ", sel_score_train)
+print("KNN Validation Accuracy: ", sel_score_test)
+'''
 
 print("----FINAL----")
 final_preprocessor = ColumnTransformer([
@@ -231,10 +235,30 @@ final_knn_param_grid = {"predictor__n_neighbors": [29, 30, 31],
 knn_gs = GridSearchCV(final_knn, final_knn_param_grid, scoring="accuracy", cv=sss)
 knn_gs.fit(train_X, train_y)
 print("KNN BEST PARAMS/SCORE: ", knn_gs.best_params_, knn_gs.best_score_)
+
 # Checking for under/overfitting
 final_knn.set_params(**knn_gs.best_params_)
 scores = cross_validate(final_knn, train_X, train_y, cv=sss, scoring="accuracy", return_train_score=True)
-print("KNN Training Accuracy: ", np.mean(scores["train_score"]))
-print("KNN Validation Accuracy: ", np.mean(scores["test_score"]))
+eng_score_train = np.mean(scores["train_score"])
+eng_score_test = np.mean(scores["test_score"])
+print("KNN Training Accuracy: ", eng_score_train)
+print("KNN Validation Accuracy: ", eng_score_test)
 
 
+'''
+names = ["Unaltered", "Post_Selection", "Post_Engineering"]
+# values = [[unaltered_score_train, unaltered_score_test],
+#          [sel_score_train, sel_score_test], [eng_score_train, eng_score_test]]
+values_train = [unaltered_score_train, sel_score_train, eng_score_train]
+values_test = [unaltered_score_test, sel_score_test, eng_score_test]
+
+plt.figure(figsize=(9, 4))
+plt.subplot(133)
+plt.plot(names, values_train, label="Training Accuracy")
+plt.plot(names, values_test, label="Validation Accuracy")
+plt.legend(loc="upper left")
+plt.ylim(0.55, 0.60)
+
+plt.ylabel("Accuracy")
+plt.show()
+'''
